@@ -140,3 +140,132 @@ git push origin frontend
 ### Keep Both Folders in Main Branch
 
 The main branch retains both `backend/` and `frontend/` folders.
+
+---
+
+## Step 6: Moving Folder Contents to Root
+
+### Moving Frontend Contents to Root (Frontend Branch)
+
+To have frontend files directly at the root level instead of in a `frontend/` folder:
+
+```bash
+git checkout frontend
+mv frontend/* ./
+mv frontend/.* ./ 2>/dev/null || true
+rm -rf frontend/
+git add .
+git commit -m "Move frontend contents to root directory"
+git push origin frontend
+```
+
+**Result:** Frontend branch now has:
+
+- package.json
+- postcss.config.js
+- tailwind.config.js
+- src/
+- public/
+- (no frontend/ folder)
+
+### Moving Backend Contents to Root (Backend Branch)
+
+Similar process for backend:
+
+```bash
+git checkout backend
+mv backend/* ./
+rm -rf backend/
+git add .
+git commit -m "Move backend contents to root directory"
+git push origin backend
+```
+
+**Result:** Backend branch now has:
+
+- index.js
+- package.json
+- config/
+- controllers/
+- models/
+- routes/
+- (no backend/ folder)
+
+### Branch Structure Summary
+
+- **Main Branch:** Contains both `backend/` and `frontend/` folders
+- **Frontend Branch:** Frontend files at root level, backend folder deleted
+- **Backend Branch:** Backend files at root level, frontend folder deleted
+
+---
+
+## Step 7: Common Errors and Troubleshooting
+
+### Error: `git mv` with Empty Directory (node_modules)
+
+**Error Message:**
+
+```
+fatal: source directory is empty, source=frontend/node_modules, destination=node_modules
+```
+
+**Cause:**
+
+- `node_modules` is not tracked by Git (it's in `.gitignore`)
+- `git mv` only works with tracked files
+
+**Solution:**
+Use regular `mv` command instead of `git mv`:
+
+```bash
+mv frontend/* ./
+```
+
+---
+
+### Error: Package Lock File Out of Sync (AWS Amplify Build)
+
+**Error Message:**
+
+```
+npm error `npm ci` can only install packages when your package.json and
+package-lock.json or npm-shrinkwrap.json are in sync.
+
+npm error Invalid: lock file's typescript@5.9.3 does not satisfy typescript@4.9.5
+```
+
+**Cause:**
+
+- `package.json` specifies TypeScript 4.9.5
+- `package-lock.json` has TypeScript 5.9.3
+- AWS Amplify uses `npm ci` which requires exact sync
+
+**Solution:**
+
+1. **Switch to frontend branch:**
+
+```bash
+git checkout frontend
+```
+
+2. **Regenerate package-lock.json:**
+
+```bash
+npm install
+```
+
+3. **Commit and push updated lock file:**
+
+```bash
+git add package-lock.json
+git commit -m "Update package-lock.json to sync with package.json"
+git push origin frontend
+```
+
+4. **AWS Amplify will automatically rebuild**
+
+**Prevention:**
+
+- Always run `npm install` after modifying `package.json`
+- Commit both `package.json` and `package-lock.json` together
+- Never manually edit `package-lock.json`
