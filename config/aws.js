@@ -2,7 +2,7 @@ const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client
 const { SSMClient, GetParameterCommand } = require('@aws-sdk/client-ssm');
 const mysql = require('mysql2/promise');
 
-const region = process.env.AWS_REGION || 'eu-west-3';
+const region = process.env.AWS_REGION || 'us-east-1';
 const secretsManagerClient = new SecretsManagerClient({ region });
 const ssmClient = new SSMClient({ region });
 
